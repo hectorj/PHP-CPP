@@ -60,11 +60,17 @@ void Callable::invoke(INTERNAL_FUNCTION_PARAMETERS)
             // return a full copy of the zval, and do not destruct it
             RETVAL_ZVAL(val, 1, 0);
         }
-        catch (Exception &exception)
+        catch (Exception &exception)//PHP Exception
         {
             // process the exception
             process(exception TSRMLS_CC);
-        }
+        } catch(std::exception &exception){//standard C++ exception
+	    Php::Exception phpException(exception.what());
+	    process(phpException TSRMLS_CC);
+	} catch(...){//other exception
+	    Php::Exception phpException("non-standard exception");
+	    process(phpException TSRMLS_CC);
+	}
     }
 }
 
